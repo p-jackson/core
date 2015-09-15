@@ -146,8 +146,13 @@ indexedMap f xs =
     foldl (::) [] [1,2,3] == [3,2,1]
 -}
 foldl : (a -> b -> b) -> b -> List a -> b
-foldl =
-  Native.List.foldl
+foldl f acc list =
+  case list of
+    [] ->
+      acc
+
+    x :: xs ->
+      foldl f (f x acc) xs
 
 
 {-| Reduce a list from the right.

@@ -1,68 +1,56 @@
-Elm.Native.List = {};
-Elm.Native.List.make = function(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.List = localRuntime.Native.List || {};
-	if (localRuntime.Native.List.values)
-	{
-		return localRuntime.Native.List.values;
-	}
-	if ('values' in Elm.Native.List)
-	{
-		return localRuntime.Native.List.values = Elm.Native.List.values;
-	}
 
-	var Utils = Elm.Native.Utils.make(localRuntime);
 
-	var Nil = Utils.Nil;
-	var Cons = Utils.Cons;
+// PRIMITIVE HELPERS
 
-	function toArray(xs)
+
+var elm_lang$core$Native$List$toArray =
+	function toArray(list)
 	{
-		var out = [];
-		while (xs.ctor !== '[]')
+		var array = [];
+		while (list.ctor !== '[]')
 		{
-			out.push(xs._0);
-			xs = xs._1;
+			array.push(list._0);
+			list = list._1;
 		}
-		return out;
-	}
+		return array;
+	};
 
-	function fromArray(arr)
+
+var elm_lang$core$Native$List$fromArray =
+	function fromArray(array)
 	{
-		var out = Nil;
-		for (var i = arr.length; i--; )
+		var list = Nil;
+		for (var i = array.length; i--; )
 		{
-			out = Cons(arr[i], out);
+			list = Cons(array[i], list);
 		}
-		return out;
-	}
+		return list;
+	};
 
+
+var elm_lang$core$Native$List$range =
 	function range(lo, hi)
 	{
-		var lst = Nil;
+		var list = Nil;
 		if (lo <= hi)
 		{
-			do { lst = Cons(hi, lst); } while (hi-- > lo);
+			do
+			{
+				list = Cons(hi, list);
+			}
+			while (hi-- > lo);
 		}
-		return lst;
-	}
+		return list;
+	};
 
-	// f defined similarly for both foldl and foldr (NB: different from Haskell)
-	// ie, foldl : (a -> b -> b) -> b -> [a] -> b
-	function foldl(f, b, xs)
-	{
-		var acc = b;
-		while (xs.ctor !== '[]')
-		{
-			acc = A2(f, xs._0, acc);
-			xs = xs._1;
-		}
-		return acc;
-	}
 
-	function foldr(f, b, xs)
+// FOLDS
+
+
+var elm_lang$core$Native$List$foldr = F3(
+	function foldr(f, b, list)
 	{
-		var arr = toArray(xs);
+		var arr = elm_lang$core$Native$List$toArray(list);
 		var acc = b;
 		for (var i = arr.length; i--; )
 		{
@@ -70,7 +58,28 @@ Elm.Native.List.make = function(localRuntime) {
 		}
 		return acc;
 	}
+);
 
+
+var elm_lang$core$Native$List$take = F2(
+	function take(n, list)
+	{
+		var array = [];
+		while (list.ctor !== '[]' && n > 0)
+		{
+			array.push(list._0);
+			list = list._1;
+			--n;
+		}
+		return elm_lang$core$Native$List$fromArray(array);
+	}
+);
+
+
+// MAPS
+
+
+var elm_lang$core$Native$List$map2 = F3(
 	function map2(f, xs, ys)
 	{
 		var arr = [];
@@ -80,9 +89,12 @@ Elm.Native.List.make = function(localRuntime) {
 			xs = xs._1;
 			ys = ys._1;
 		}
-		return fromArray(arr);
+		return elm_lang$core$Native$List$fromArray(arr);
 	}
+);
 
+
+var elm_lang$core$Native$List$map3 = F4(
 	function map3(f, xs, ys, zs)
 	{
 		var arr = [];
@@ -93,9 +105,12 @@ Elm.Native.List.make = function(localRuntime) {
 			ys = ys._1;
 			zs = zs._1;
 		}
-		return fromArray(arr);
+		return elm_lang$core$Native$List$fromArray(arr);
 	}
+);
 
+
+var elm_lang$core$Native$List$map4 = F5(
 	function map4(f, ws, xs, ys, zs)
 	{
 		var arr = [];
@@ -110,9 +125,12 @@ Elm.Native.List.make = function(localRuntime) {
 			ys = ys._1;
 			zs = zs._1;
 		}
-		return fromArray(arr);
+		return elm_lang$core$Native$List$fromArray(arr);
 	}
+);
 
+
+var elm_lang$core$Native$List$map5 = F6(
 	function map5(f, vs, ws, xs, ys, zs)
 	{
 		var arr = [];
@@ -129,55 +147,41 @@ Elm.Native.List.make = function(localRuntime) {
 			ys = ys._1;
 			zs = zs._1;
 		}
-		return fromArray(arr);
+		return elm_lang$core$Native$List$fromArray(arr);
 	}
+);
 
-	function sortBy(f, xs)
+
+// SORTING
+
+
+var elm_lang$core$Native$List$sortBy = F2(
+	function sortBy(toComparable, list)
 	{
-		return fromArray(toArray(xs).sort(function(a, b) {
-			return Utils.cmp(f(a), f(b));
-		}));
+		return elm_lang$core$Native$List$fromArray(
+			elm_lang$core$Native$List$toArray(list).sort(
+				function(a, b)
+				{
+					return elm_lang$core$Native$Utils$cmp(toComparable(a), toComparable(b));
+				}
+			)
+		);
 	}
+);
 
-	function sortWith(f, xs)
+
+var elm_lang$core$Native$List$sortWith = F2(
+	function sortWith(compare, list)
 	{
-		return fromArray(toArray(xs).sort(function(a, b) {
-			var ord = f(a)(b).ctor;
-			return ord === 'EQ' ? 0 : ord === 'LT' ? -1 : 1;
-		}));
+		return elm_lang$core$Native$List$fromArray(
+			elm_lang$core$Native$List$toArray(list).sort(
+				function(a, b)
+				{
+					var ord = compare(a)(b).ctor;
+					return ord === 'EQ' ? 0 : ord === 'LT' ? -1 : 1;
+				}
+			)
+		);
 	}
+);
 
-	function take(n, xs)
-	{
-		var arr = [];
-		while (xs.ctor !== '[]' && n > 0)
-		{
-			arr.push(xs._0);
-			xs = xs._1;
-			--n;
-		}
-		return fromArray(arr);
-	}
-
-
-	Elm.Native.List.values = {
-		Nil: Nil,
-		Cons: Cons,
-		cons: F2(Cons),
-		toArray: toArray,
-		fromArray: fromArray,
-		range: range,
-
-		foldl: F3(foldl),
-		foldr: F3(foldr),
-
-		map2: F3(map2),
-		map3: F4(map3),
-		map4: F5(map4),
-		map5: F6(map5),
-		sortBy: F2(sortBy),
-		sortWith: F2(sortWith),
-		take: F2(take)
-	};
-	return localRuntime.Native.List.values = Elm.Native.List.values;
-};
