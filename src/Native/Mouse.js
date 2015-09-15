@@ -1,42 +1,67 @@
-Elm.Native = Elm.Native || {};
-Elm.Native.Mouse = {};
-Elm.Native.Mouse.make = function(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Mouse = localRuntime.Native.Mouse || {};
-	if (localRuntime.Native.Mouse.values)
-	{
-		return localRuntime.Native.Mouse.values;
-	}
 
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Utils = Elm.Native.Utils.make(localRuntime);
 
-	var position = NS.input('Mouse.position', Utils.Tuple2(0, 0));
+var elm_lang$core$Native$Mouse$position = function()
+{
+	var position = elm_lang$core$Native$Signal.input(
+		'Mouse.position',
+		elm_lang$core$Native$Utils$Tuple2(0, 0)
+	);
 
-	var isDown = NS.input('Mouse.isDown', false);
+	elm_lang$core$Native$Runtime$instance.addListener(
+		[position.id],
+		elm_lang$core$Native$Runtime$instance.rootNode,
+		'mousemove',
+		function move(e)
+		{
+			elm_lang$core$Native$Runtime$instance.notify(position.id, elm_lang$core$Native$Utils$getXY(e));
+		}
+	);
 
-	var clicks = NS.input('Mouse.clicks', Utils.Tuple0);
+	return position;
+}();
 
-	var node = localRuntime.isFullscreen()
-		? document
-		: localRuntime.node;
 
-	localRuntime.addListener([clicks.id], node, 'click', function click() {
-		localRuntime.notify(clicks.id, Utils.Tuple0);
-	});
-	localRuntime.addListener([isDown.id], node, 'mousedown', function down() {
-		localRuntime.notify(isDown.id, true);
-	});
-	localRuntime.addListener([isDown.id], node, 'mouseup', function up() {
-		localRuntime.notify(isDown.id, false);
-	});
-	localRuntime.addListener([position.id], node, 'mousemove', function move(e) {
-		localRuntime.notify(position.id, Utils.getXY(e));
-	});
+var elm_lang$core$Native$Mouse$isDown = function()
+{
+	var isDown = elm_lang$core$Native$Signal.input('Mouse.isDown', false);
 
-	return localRuntime.Native.Mouse.values = {
-		position: position,
-		isDown: isDown,
-		clicks: clicks
-	};
-};
+	elm_lang$core$Native$Runtime$instance.addListener(
+		[isDown.id],
+		elm_lang$core$Native$Runtime$instance.rootNode,
+		'mousedown',
+		function down()
+		{
+			elm_lang$core$Native$Runtime$instance.notify(isDown.id, true);
+		}
+	);
+
+	elm_lang$core$Native$Runtime$instance.addListener(
+		[isDown.id],
+		elm_lang$core$Native$Runtime$instance.rootNode,
+		'mouseup',
+		function up()
+		{
+			elm_lang$core$Native$Runtime$instance.notify(isDown.id, false);
+		}
+	);
+
+	return isDown
+}();
+
+
+var elm_lang$core$Native$Mouse$clicks = function()
+{
+	var clicks = elm_lang$core$Native$Signal.input('Mouse.clicks', elm_lang$core$Native$Utils$Tuple0);
+
+	elm_lang$core$Native$Runtime$instance.addListener(
+		[clicks.id],
+		elm_lang$core$Native$Runtime$instance.rootNode,
+		'click',
+		function click()
+		{
+			elm_lang$core$Native$Runtime$instance.notify(clicks.id, elm_lang$core$Native$Utils$Tuple0);
+		}
+	);
+
+	return clicks;
+}();
